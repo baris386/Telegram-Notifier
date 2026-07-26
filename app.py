@@ -1,14 +1,20 @@
 from flask import jsonify, Flask, render_template, request, redirect, url_for
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
+import os
 import init_db as db
 import scheduler as notif_scheduler
 
+# Serverin saat qurşağını Bakı vaxtına (Asia/Baku) keçiririk
+os.environ['TZ'] = 'Asia/Baku'
+
 app = Flask(__name__, template_folder='Frontend', static_folder='Frontend', static_url_path='')
 
+# Server hər dəfə başlayanda cədvəlin varlığını yoxlayır, yoxdursa özü yaradır
 with app.app_context():
     db.init_db()
 
+# Scheduler obyektini yaradırıq
 _scheduler = BackgroundScheduler()
 _scheduler.add_job(
     func=notif_scheduler.check_and_send_notifications,
@@ -16,9 +22,10 @@ _scheduler.add_job(
     seconds=5,
     id='notif_check',
     replace_existing=True,
-    next_run_time=datetime.now(),
+    next_run_time=datetime.now()
 )
 
+# Render / Gunicorn mühitində scheduler-in mütləq işə düşməsini təmin edirik
 if not _scheduler.running:
     _scheduler.start()
 
@@ -32,6 +39,7 @@ def add():
     notification_message = request.form['notification_message']
     notification_date    = request.form['notification_date']
     notification_time    = request.form['notification_time']
+    
     db.add_notification(notification_name, notification_message, notification_date, notification_time, 'Pending')
     return redirect(url_for('index'))
 
