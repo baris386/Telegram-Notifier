@@ -6,6 +6,9 @@ import scheduler as notif_scheduler
 
 app = Flask(__name__, template_folder='Frontend', static_folder='Frontend', static_url_path='')
 
+with app.app_context():
+    db.init_db()
+
 _scheduler = BackgroundScheduler()
 _scheduler.add_job(
     func=notif_scheduler.check_and_send_notifications,
