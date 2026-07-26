@@ -1,6 +1,6 @@
 # 🔔 Telegram Notifier & Alert Dashboard
 
-**Telegram Notifier**, tapşırıqlarınızı və bildirişlərinizi idarə etmək üçün hazırlanmış veb-əsaslı idarəetmə panelidir. Müəyyən etdiyiniz tarix və saat çatdıqda, sistem avtomatik olaraq Telegram botu vasitəsilə sizə bildiriş göndərir.
+**Telegram Notifier** is a responsive web application designed to help you manage schedules and stay updated. Set custom tasks with specific dates and times, and receive automated notifications delivered straight to your Telegram chat.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
@@ -9,30 +9,30 @@
 
 ---
 
-## ✨ Özəlliklər
+## ✨ Features
 
-* 📅 **Təqvim və Tapşırıq İdarəetməsi:** Bildirişləri tarix, saat, ad və mesaj daxil edərək asanlıqla yaradın.
-* ⚡ **Canlı Yenilənmə (CRUD):** Mövcud bildirişləri redaktə edin (`Edit`), silin (`Delete`) və ya statusunu izləyin.
-* 🤖 **Telegram Bot İnteqrasiyası:** Vaxtı gələn tapşırıqlar arxa fonda çalışan scheduler vasitəsilə avtomatik Telegram-a mesaj kimi göndərilir.
-* 🕒 **Timezone Dəstəyi:** Bakı saatı (UTC+4) ilə tam uyğunlaşdırılmış bildiriş sistemi.
+* 📅 **Task & Schedule Management:** Easily create notifications with custom titles, messages, dates, and times via an interactive dashboard interface.
+* ⚡ **Full CRUD Functionality:** Edit scheduled alerts, delete outdated ones, or track their real-time delivery status (`Pending` / `Sent`).
+* 🤖 **Automated Telegram Bot Alerts:** Built-in background worker continually checks active schedules and dispatches instant Telegram messages when triggers expire.
+* 🕒 **Timezone Support:** Configured for seamless execution and accurate notification triggers in the Azerbaijan Timezone (UTC+4).
 
 ---
 
-## 🛠️ Texnologiyalar
+## 🛠️ Tech Stack
 
 * **Backend:** Python, Flask
-* **Task Scheduler:** APScheduler (BackgroundScheduler)
+* **Task Scheduling:** APScheduler (BackgroundScheduler)
 * **Database:** SQLite
 * **Frontend:** HTML5, CSS3, JavaScript (Fetch API)
-* **Hosting / Deployment:** Render
+* **Deployment:** Render
 
 ---
 
-## 🚀 Quraşdırma (Local Setup)
+## 🚀 Local Setup Guide
 
-Layihəni öz kompüterinizdə işə salmaq üçün bu addımları izləyin:
+Follow these steps to run the project locally on your machine:
 
-1. **Repozitoriyanı klonlayın:**
+1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/ISTIFADECE_ADI/telegram-notifier.git](https://github.com/ISTIFADECE_ADI/telegram-notifier.git)
-   cd telegram-notifier
+   git clone [https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git](https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git)
+   cd YOUR_REPOSITORY
