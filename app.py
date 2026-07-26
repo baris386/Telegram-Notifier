@@ -19,6 +19,9 @@ _scheduler.add_job(
     next_run_time=datetime.now(),
 )
 
+if not _scheduler.running:
+    _scheduler.start()
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -76,9 +79,4 @@ def get_notifications():
     return jsonify(notifications_list)
 
 if __name__ == '__main__':
-    db.init_db()
-    _scheduler.start()
-    try:
-        app.run(debug=False)
-    finally:
-        _scheduler.shutdown()
+    app.run(debug=False)
