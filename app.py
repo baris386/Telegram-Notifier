@@ -6,7 +6,15 @@ import scheduler as notif_scheduler
 # Serverin saat qurşağını Bakı vaxtına (Asia/Baku) keçiririk
 os.environ['TZ'] = 'Asia/Baku'
 
-app = Flask(__name__, template_folder='Frontend', static_folder='Frontend', static_url_path='')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.join(BASE_DIR, 'Frontend')
+
+app = Flask(
+    __name__,
+    template_folder=FRONTEND_DIR,
+    static_folder=FRONTEND_DIR,
+    static_url_path=''
+)
 
 @app.before_request
 def ensure_db():
@@ -18,6 +26,9 @@ def ensure_db():
             print(f"DB Init Error: {e}")
 
 @app.route('/')
+@app.route('/index')
+@app.route('/api/index')
+@app.route('/api/index.py')
 def index():
     return render_template('index.html')
 
