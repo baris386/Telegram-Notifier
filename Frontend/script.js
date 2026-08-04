@@ -108,68 +108,80 @@ async function loadNotifications() {
         if (!container) return;
         container.innerHTML = "";
 
+        if (notifications.length === 0) {
+            const emptyEl = document.createElement("div");
+            emptyEl.className = "empty-state";
+            emptyEl.innerHTML = `
+                <span class="icon icon-bell empty-icon"></span>
+                <p>No notifications scheduled yet.</p>
+            `;
+            container.appendChild(emptyEl);
+            return;
+        }
+
         notifications.forEach((item) => {
             const card = document.createElement("div");
             card.classList.add("notification-item");
+            if (item.status === "Pending") card.classList.add("pending");
 
             const statusClass = item.status === "Sent" ? "status-sent" : "status-pending";
+            const statusIcon = item.status === "Sent" ? "icon-sent" : "icon-pending";
+            const statusLabel = item.status === "Sent" ? "Sent" : "Pending";
 
-            const title = document.createElement("h4");
-            title.textContent = item.name;
+            card.innerHTML = `
+                <div class="notif-header">
+                    <h4>${item.name}</h4>
+                    <span class="status ${statusClass}">
+                        <span class="icon ${statusIcon}"></span> ${statusLabel}
+                    </span>
+                </div>
+                <p class="notif-message">
+                    <span class="icon icon-message"></span>
+                    <span>${item.message || "—"}</span>
+                </p>
+                <div class="notif-meta">
+                    <span><span class="icon icon-calendar"></span> ${item.date}</span>
+                    <span><span class="icon icon-clock"></span> ${item.time}</span>
+                </div>
+                <div class="notif-actions">
+                    <button type="button" class="btn-edit">
+                        <span class="icon icon-edit"></span> Edit
+                    </button>
+                    <button type="button" class="btn-delete">
+                        <span class="icon icon-delete"></span> Delete
+                    </button>
+                </div>
+            `;
 
-            const message = document.createElement("p");
-            message.className = "notif-message";
-            message.textContent = `💬 ${item.message || "—"}`;
+            // Attach event listeners
+            const editBtn = card.querySelector(".btn-edit");
+            if (editBtn) {
+                editBtn.addEventListener("click", () => openEditModal(item));
+            }
 
-            const meta = document.createElement("p");
-            meta.textContent = `📅 ${item.date} | ⏰ ${item.time}`;
-
-            const status = document.createElement("span");
-            status.className = `status ${statusClass}`;
-            status.textContent = item.status === "Sent" ? "✅ Sent" : "⏳ Pending";
-
-            const actions = document.createElement("div");
-            actions.style.marginTop = "8px";
-
-            const editBtn = document.createElement("button");
-            editBtn.type = "button";
-            editBtn.className = "btn-edit";
-            editBtn.textContent = "✏️ Edit";
-            editBtn.addEventListener("click", () => openEditModal(item));
-
-            const deleteBtn = document.createElement("button");
-            deleteBtn.type = "button";
-            deleteBtn.className = "btn-delete";
-            deleteBtn.textContent = "🗑️ Sil";
-            deleteBtn.addEventListener("click", async () => {
-                if (confirm(`"${item.name}" bildirişini silmək istədiyinizdən əminsiniz?`)) {
-                    try {
-                        const delResponse = await fetch(`/delete/${item.id}`, {
-                            method: "POST",
-                            headers: {
-                                "X-Requested-With": "XMLHttpRequest"
+            const deleteBtn = card.querySelector(".btn-delete");
+            if (deleteBtn) {
+                deleteBtn.addEventListener("click", async () => {
+                    if (confirm(`"${item.name}" bildirişini silmək istədiyinizdən əminsiniz?`)) {
+                        try {
+                            const delResponse = await fetch(`/delete/${item.id}`, {
+                                method: "POST",
+                                headers: {
+                                    "X-Requested-With": "XMLHttpRequest"
+                                }
+                            });
+                            if (delResponse.ok) {
+                                await loadNotifications();
+                            } else {
+                                alert("Silinərkən xəta baş verdi");
                             }
-                        });
-                        if (delResponse.ok) {
-                            await loadNotifications();
-                        } else {
+                        } catch (err) {
+                            console.error("Silmə xətası:", err);
                             alert("Silinərkən xəta baş verdi");
                         }
-                    } catch (err) {
-                        console.error("Silmə xətası:", err);
-                        alert("Silinərkən xəta baş verdi");
                     }
-                }
-            });
-
-            actions.appendChild(editBtn);
-            actions.appendChild(deleteBtn);
-
-            card.appendChild(title);
-            card.appendChild(message);
-            card.appendChild(meta);
-            card.appendChild(status);
-            card.appendChild(actions);
+                });
+            }
 
             container.appendChild(card);
         });

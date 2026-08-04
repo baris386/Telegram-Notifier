@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notifier Bot Dashboard</title>
+    <title>Telegram Notifier Dashboard</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="dashboard">
+        <!-- Calendar Card -->
         <div class="card calendar-card">
             <div class="today-box">
                 <span id="today-day">26</span>
@@ -31,31 +36,54 @@
             </div>
         </div>
         
+        <!-- Add Notification Card -->
         <div class="card add-card">
+            <div class="card-header">
+                <span class="icon icon-bell"></span>
+                <h3>New Notification</h3>
+            </div>
             <form id="add-form" action="/add" method="POST">
                 <label>Title</label>
-                <input type="text" name="notification_name" placeholder="Notification name" required>
+                <input type="text" name="notification_name" placeholder="Enter title..." required>
 
                 <label>Message</label>
-                <textarea name="notification_message" placeholder="Message..." rows="3" required></textarea>
+                <textarea name="notification_message" placeholder="Write notification message..." rows="3" required></textarea>
 
-                <label>Date</label>
-                <input type="date" name="notification_date" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" name="notification_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" name="notification_time" required>
+                    </div>
+                </div>
 
-                <label>Time</label>
-                <input type="time" name="notification_time" required>
-
-                <button type="submit" class="save-btn">Add</button>
+                <button type="submit" class="save-btn">
+                    <span class="icon icon-save"></span> Add Notification
+                </button>
             </form>
         </div>
 
-        <div class="card notifications-card"></div>
+        <!-- Notifications List Card -->
+        <div class="card notifications-card-container">
+            <div class="card-header">
+                <span class="icon icon-message"></span>
+                <h3>Scheduled Alerts</h3>
+            </div>
+            <div class="notifications-card"></div>
+        </div>
     </div>
 
+    <!-- Edit Modal -->
     <div id="edit-modal" class="modal" style="display: none;" aria-hidden="true">
         <div class="modal-content" role="dialog" aria-labelledby="edit-modal-title">
             <span class="close-btn" onclick="closeEditModal()" aria-label="Close">&times;</span>
-            <h3 id="edit-modal-title">Edit Notification</h3>
+            <div class="modal-header">
+                <span class="icon icon-edit"></span>
+                <h3 id="edit-modal-title">Edit Notification</h3>
+            </div>
 
             <form id="edit-form">
                 <input type="hidden" id="edit-id">
@@ -64,16 +92,23 @@
                 <label>Title</label>
                 <input type="text" id="edit-name" required>
 
-                <label>Message:</label>
+                <label>Message</label>
                 <textarea id="edit-message" rows="3" required></textarea>
 
-                <label>Date:</label>
-                <input type="date" id="edit-date" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="edit-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" id="edit-time" required>
+                    </div>
+                </div>
 
-                <label>Time:</label>
-                <input type="time" id="edit-time" required>
-
-                <button type="submit" class="save-btn">Save</button>
+                <button type="submit" class="save-btn">
+                    <span class="icon icon-save"></span> Save Changes
+                </button>
             </form>
         </div>
     </div>
