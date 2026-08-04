@@ -1,9 +1,19 @@
 from flask import jsonify, Flask, render_template, request, redirect, url_for
+<<<<<<< HEAD
+=======
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime
+import os
+>>>>>>> 4fa81e241f21feb4eb14421698f6cf0de8b4e406
 import init_db as db
 import scheduler as notif_scheduler
 
+# Serverin saat qurşağını Bakı vaxtına (Asia/Baku) keçiririk
+os.environ['TZ'] = 'Asia/Baku'
+
 app = Flask(__name__, template_folder='Frontend', static_folder='Frontend', static_url_path='')
 
+<<<<<<< HEAD
 @app.before_request
 def ensure_db():
     if not getattr(app, '_db_initialized', False):
@@ -12,6 +22,26 @@ def ensure_db():
             app._db_initialized = True
         except Exception as e:
             print(f"DB Init Error: {e}")
+=======
+# Server hər dəfə başlayanda cədvəlin varlığını yoxlayır, yoxdursa özü yaradır
+with app.app_context():
+    db.init_db()
+
+# Scheduler obyektini yaradırıq
+_scheduler = BackgroundScheduler()
+_scheduler.add_job(
+    func=notif_scheduler.check_and_send_notifications,
+    trigger='interval',
+    seconds=5,
+    id='notif_check',
+    replace_existing=True,
+    next_run_time=datetime.now()
+)
+>>>>>>> 4fa81e241f21feb4eb14421698f6cf0de8b4e406
+
+# Render / Gunicorn mühitində scheduler-in mütləq işə düşməsini təmin edirik
+if not _scheduler.running:
+    _scheduler.start()
 
 @app.route('/')
 def index():
@@ -23,6 +53,7 @@ def add():
     notification_message = request.form['notification_message']
     notification_date    = request.form['notification_date']
     notification_time    = request.form['notification_time']
+    
     db.add_notification(notification_name, notification_message, notification_date, notification_time, 'Pending')
     return redirect(url_for('index'))
 
@@ -80,5 +111,9 @@ def cron_trigger():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     db.init_db()
     app.run(debug=True)
+=======
+    app.run(debug=False)
+>>>>>>> 4fa81e241f21feb4eb14421698f6cf0de8b4e406
