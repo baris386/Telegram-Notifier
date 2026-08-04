@@ -34,13 +34,24 @@ def index():
 
 @app.route('/add', methods=['POST'])
 def add():
-    notification_name    = request.form['notification_name']
-    notification_message = request.form['notification_message']
-    notification_date    = request.form['notification_date']
-    notification_time    = request.form['notification_time']
-    
-    db.add_notification(notification_name, notification_message, notification_date, notification_time, 'Pending')
-    return redirect(url_for('index'))
+    try:
+        notification_name    = request.form.get('notification_name')
+        notification_message = request.form.get('notification_message')
+        notification_date    = request.form.get('notification_date')
+        notification_time    = request.form.get('notification_time')
+        
+        if not notification_name or not notification_date or not notification_time:
+            return jsonify({"status": "error", "message": "Bütün vacib xanaları doldurun"}), 400
+
+        db.add_notification(notification_name, notification_message or "", notification_date, notification_time, 'Pending')
+        
+        # Check if request is AJAX
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({"status": "success", "message": "Əlavə olundu"}), 200
+        return redirect(url_for('index'))
+    except Exception as e:
+        print(f"Add Error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/edit/<int:notification_id>', methods=['POST'])
 def edit(notification_id):
@@ -52,12 +63,12 @@ def edit(notification_id):
         notification_status = request.form.get('notification_status')
 
         db.update_notification(
-            notification_id, 
+            int(notification_id), 
             notification_name, 
-            notification_message, 
+            notification_message or "", 
             notification_date, 
             notification_time, 
-            notification_status
+            notification_status or "Pending"
         )
         
         return jsonify({"status": "success", "message": "Yeniləndi"}), 200
@@ -67,23 +78,33 @@ def edit(notification_id):
 
 @app.route('/delete/<int:notification_id>', methods=['POST'])
 def delete(notification_id):
-    db.delete_notification(notification_id)
-    return redirect(url_for('index'))
+    try:
+        db.delete_notification(int(notification_id))
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({"status": "success", "message": "Silindi"}), 200
+        return redirect(url_for('index'))
+    except Exception as e:
+        print(f"Delete Error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/get_notifications', methods=['GET'])
 def get_notifications():
-    notifications = db.get_all_notifications()
-    notifications_list = []
-    for row in notifications:
-        notifications_list.append({
-            "id":      row[0],
-            "name":    row[1],
-            "message": row[2],
-            "date":    row[3],
-            "time":    row[4],
-            "status":  row[5]
-        })
-    return jsonify(notifications_list)
+    try:
+        notifications = db.get_all_notifications()
+        notifications_list = []
+        for row in notifications:
+            notifications_list.append({
+                "id":      row[0],
+                "name":    row[1],
+                "message": row[2],
+                "date":    row[3],
+                "time":    row[4],
+                "status":  row[5]
+            })
+        return jsonify(notifications_list)
+    except Exception as e:
+        print(f"Get Notifications Error: {e}")
+        return jsonify([]), 500
 
 @app.route('/api/cron', methods=['GET', 'POST', 'HEAD'])
 @app.route('/cron', methods=['GET', 'POST', 'HEAD'])
