@@ -1,7 +1,10 @@
 import requests
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import init_db as db
 import config
+
+# Azerbaijan Timezone (UTC+4)
+AZT = timezone(timedelta(hours=4))
 
 def send_telegram_message(text):
     """Telegram Bot API vasitəsilə mesaj göndərir."""
@@ -18,7 +21,6 @@ def send_telegram_message(text):
         print(f"[Scheduler] Telegram göndərmə xətası: {e}")
         return False
 
-
 def _parse_scheduled_datetime(notif_date, notif_time):
     raw_time = (notif_time or "").strip()
     if len(raw_time) == 5:
@@ -30,14 +32,14 @@ def _parse_scheduled_datetime(notif_date, notif_time):
             continue
     return None
 
-
 def check_and_send_notifications():
     """
-    Hər bir neçə saniyədə çağırılır.
     Pending bildirişlər arasında vaxtı gəlmiş olanları tapır,
     Telegram-a göndərir, statusu Sent edir.
+    Bakı vaxtına (UTC+4) uyğunlaşdırılıb.
     """
-    now = datetime.now()
+    # Always compute current time in Baku timezone (UTC+4)
+    now = datetime.now(AZT).replace(tzinfo=None)
     pending = db.get_pending_notifications()
 
     for notif in pending:
