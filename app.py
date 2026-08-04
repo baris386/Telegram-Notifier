@@ -1,20 +1,17 @@
 from flask import jsonify, Flask, render_template, request, redirect, url_for
-from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime
 import init_db as db
 import scheduler as notif_scheduler
 
 app = Flask(__name__, template_folder='Frontend', static_folder='Frontend', static_url_path='')
 
-_scheduler = BackgroundScheduler()
-_scheduler.add_job(
-    func=notif_scheduler.check_and_send_notifications,
-    trigger='interval',
-    seconds=5,
-    id='notif_check',
-    replace_existing=True,
-    next_run_time=datetime.now(),
-)
+@app.before_request
+def ensure_db():
+    if not getattr(app, '_db_initialized', False):
+        try:
+            db.init_db()
+            app._db_initialized = True
+        except Exception as e:
+            print(f"DB Init Error: {e}")
 
 @app.route('/')
 def index():
@@ -72,10 +69,16 @@ def get_notifications():
         })
     return jsonify(notifications_list)
 
+@app.route('/api/cron', methods=['GET', 'POST'])
+def cron_trigger():
+    """Endpoint executed periodically by Vercel Cron to check and send due notifications."""
+    try:
+        notif_scheduler.check_and_send_notifications()
+        return jsonify({"status": "success", "message": "Cron execution completed"}), 200
+    except Exception as e:
+        print(f"Cron execution error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 if __name__ == '__main__':
     db.init_db()
-    _scheduler.start()
-    try:
-        app.run(debug=False)
-    finally:
-        _scheduler.shutdown()
+    app.run(debug=True)
