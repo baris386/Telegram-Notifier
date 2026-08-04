@@ -1,10 +1,5 @@
-from flask import jsonify, Flask, render_template, request, redirect, url_for
-<<<<<<< HEAD
-=======
-from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime
 import os
->>>>>>> 4fa81e241f21feb4eb14421698f6cf0de8b4e406
+from flask import jsonify, Flask, render_template, request, redirect, url_for, make_response
 import init_db as db
 import scheduler as notif_scheduler
 
@@ -13,7 +8,6 @@ os.environ['TZ'] = 'Asia/Baku'
 
 app = Flask(__name__, template_folder='Frontend', static_folder='Frontend', static_url_path='')
 
-<<<<<<< HEAD
 @app.before_request
 def ensure_db():
     if not getattr(app, '_db_initialized', False):
@@ -22,26 +16,6 @@ def ensure_db():
             app._db_initialized = True
         except Exception as e:
             print(f"DB Init Error: {e}")
-=======
-# Server hər dəfə başlayanda cədvəlin varlığını yoxlayır, yoxdursa özü yaradır
-with app.app_context():
-    db.init_db()
-
-# Scheduler obyektini yaradırıq
-_scheduler = BackgroundScheduler()
-_scheduler.add_job(
-    func=notif_scheduler.check_and_send_notifications,
-    trigger='interval',
-    seconds=5,
-    id='notif_check',
-    replace_existing=True,
-    next_run_time=datetime.now()
-)
->>>>>>> 4fa81e241f21feb4eb14421698f6cf0de8b4e406
-
-# Render / Gunicorn mühitində scheduler-in mütləq işə düşməsini təmin edirik
-if not _scheduler.running:
-    _scheduler.start()
 
 @app.route('/')
 def index():
@@ -100,20 +74,25 @@ def get_notifications():
         })
     return jsonify(notifications_list)
 
-@app.route('/api/cron', methods=['GET', 'POST'])
+@app.route('/api/cron', methods=['GET', 'POST', 'HEAD'])
+@app.route('/cron', methods=['GET', 'POST', 'HEAD'])
 def cron_trigger():
-    """Endpoint executed periodically by Vercel Cron to check and send due notifications."""
+    """
+    Endpoint executed by cron-job.org (or external ping services / Vercel Cron)
+    to check pending notifications and deliver due ones via Telegram.
+    """
     try:
         notif_scheduler.check_and_send_notifications()
-        return jsonify({"status": "success", "message": "Cron execution completed"}), 200
+        res = make_response(jsonify({"status": "success", "message": "Cron job completed successfully"}), 200)
     except Exception as e:
         print(f"Cron execution error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        res = make_response(jsonify({"status": "error", "message": str(e)}), 500)
+    
+    # Disable response caching for cron requests
+    res.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    res.headers["Pragma"] = "no-cache"
+    return res
 
 if __name__ == '__main__':
-<<<<<<< HEAD
     db.init_db()
     app.run(debug=True)
-=======
-    app.run(debug=False)
->>>>>>> 4fa81e241f21feb4eb14421698f6cf0de8b4e406
